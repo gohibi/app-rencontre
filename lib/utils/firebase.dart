@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:datingapp/authentication_screen/login_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:get/get.dart';
 
 class FirebaseServices{
   static final FirebaseAuth auth = FirebaseAuth.instance;
@@ -22,6 +24,7 @@ class FirebaseServices{
 
   Future<void>sigOut() async{
     await auth.signOut();
+    Get.to(LoginScreen());
   }
 
 }

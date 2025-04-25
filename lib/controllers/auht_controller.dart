@@ -102,7 +102,7 @@ class AuthController extends GetxController{
 
       // Création de l'objet Person
       Person newUserData = Person(
-
+        uid: userCredential.user!.uid,
         imageUrl: imageUrl,
         email: emailAddress,
         fullname: fullname,

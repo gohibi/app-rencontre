@@ -1,3 +1,8 @@
+import 'package:datingapp/tabSceens/favorite_sent_favorite_received_screen.dart';
+import 'package:datingapp/tabSceens/like_sent_like_received_screen.dart';
+import 'package:datingapp/tabSceens/swipping_screen.dart';
+import 'package:datingapp/tabSceens/user_detail_screen.dart';
+import 'package:datingapp/tabSceens/view_sent_view_received_screen.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -8,18 +13,58 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  int _selectedIndex = 0;
+
+  final List screenTabs = [
+    SwippingScreen(),
+    UserDetailScreen(),
+    ViewSentViewReceivedScreen(),
+    LikeSentLikeReceivedScreen(),
+    FavoriteSentFavoriteReceivedScreen(),
+  ];
+
+  void _onItemTapped(int index){
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
-      body: Center(
-        child: Text(
-          "Welcome",
-          style: TextStyle(
-            color: Colors.red,
-            fontSize: 20,
+      bottomNavigationBar: BottomNavigationBar(
+        onTap: _onItemTapped,
+        currentIndex: _selectedIndex,
+        selectedItemColor:Color(0xFF123880),
+        backgroundColor: Colors.white,
+        unselectedItemColor: Colors.black,
+        type: BottomNavigationBarType.fixed,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Accueil',
           ),
-        ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Profil',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.remove_red_eye),
+            label: 'Vues',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.favorite),
+            label: 'Likes',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.star),
+            label: 'Favoris',
+          )
+        ],
+
       ),
+      body: screenTabs[_selectedIndex]
     );
   }
 }

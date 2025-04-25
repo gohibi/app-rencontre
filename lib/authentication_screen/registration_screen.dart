@@ -753,6 +753,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                            );
                            setState(() {
                              showProgressBar = false;
+                             authController.imageFile = null;
                            });
                         } else{
                           Get.snackbar("Un champ est vide", "Veuillez remplir tous les champs" ,backgroundColor: Color(0xFF123880),

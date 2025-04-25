@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Person{
 // Informations personnelles
+  String uid;
   String? imageUrl;
   String? email;
   String? password;
@@ -42,6 +43,7 @@ class Person{
 
   Person({
     // Informations personnelles
+    required this.uid,
     this.email,
     this.password,
     this.fullname,
@@ -79,6 +81,7 @@ class Person{
   static Person fromDataSnapshot(DocumentSnapshot snapshot){
     var data = snapshot.data() as Map<String,dynamic>;
     return Person(
+      uid: data['uid'],
       imageUrl: data['imageUrl'],
       email: data['email'],
       password: data['password'],
@@ -109,12 +112,13 @@ class Person{
       education: data['education'],
       religion: data['religion'],
       languageSpoken: data['languageSpoken'],
-        publishedDateTime: data["publishedDateTime"]
+        publishedDateTime: (data["publishedDateTime"] as Timestamp?)?.toDate()
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
+      'uid':uid,
       'imageUrl': imageUrl,
       'email': email,
       'password': password,
