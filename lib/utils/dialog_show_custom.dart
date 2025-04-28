@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-void _showCustomDialog(bool isAdded) {
+void showCustomDialog(bool isAdded) {
   Get.dialog(
     AlertDialog(
       backgroundColor: Colors.white, // Couleur de fond

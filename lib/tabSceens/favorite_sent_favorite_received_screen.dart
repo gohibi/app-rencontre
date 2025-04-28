@@ -178,7 +178,7 @@ class _FavoriteSentFavoriteReceivedScreenState extends State<FavoriteSentFavorit
                       ),
                     ),
                     Container(
-                      color: Colors.black.withOpacity(0.3), // léger voile noir
+                      color: Colors.black.withAlpha(30), // léger voile noir
                     ),
                     Padding(
                       padding: const EdgeInsets.all(8.0),
