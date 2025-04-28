@@ -284,7 +284,7 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
+
     super.initState();
     retrieveUserData();
   }

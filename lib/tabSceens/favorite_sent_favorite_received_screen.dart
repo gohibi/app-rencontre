@@ -66,7 +66,6 @@ class _FavoriteSentFavoriteReceivedScreenState extends State<FavoriteSentFavorit
   }
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     getFavoriteListKeys();
   }

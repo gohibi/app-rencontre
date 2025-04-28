@@ -106,7 +106,6 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     fetchDataUserFromFirestore();
   }

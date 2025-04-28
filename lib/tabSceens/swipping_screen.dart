@@ -32,7 +32,6 @@ class _SwippingScreenState extends State<SwippingScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     readCurrentUserdata();
   }
