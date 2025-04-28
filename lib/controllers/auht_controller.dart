@@ -13,7 +13,6 @@ import 'package:image_picker/image_picker.dart';
 import '../models/person.dart';
 
 class AuthController extends GetxController{
-  static AuthController authenticationController = Get.find();
 
   late Rx<User?> firebaseCurrentUser;
   late Rx<File?> pickedFile;

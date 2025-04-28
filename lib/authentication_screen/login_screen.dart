@@ -15,7 +15,8 @@ class _LoginScreenState extends State<LoginScreen> {
   TextEditingController emailTextEditingController = TextEditingController();
   TextEditingController passwordTextEditingController = TextEditingController();
   bool showProgressBar = false;
-  var authController = AuthController.authenticationController;
+  final AuthController authController = Get.find<AuthController>();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

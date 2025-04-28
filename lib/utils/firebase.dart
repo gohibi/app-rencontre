@@ -7,6 +7,8 @@ class FirebaseServices{
   static final FirebaseAuth auth = FirebaseAuth.instance;
   static final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
+  static String userCurrentId = auth.currentUser!.uid;
+
   Future<UserCredential> createUserWithEmailAndPassword({
     required String email,
     required String password

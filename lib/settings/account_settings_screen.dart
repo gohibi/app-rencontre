@@ -1,22 +1,27 @@
 import 'dart:io';
-
-import 'package:datingapp/authentication_screen/login_screen.dart';
+import 'package:datingapp/homeScreen/home_screen.dart';
+import 'package:datingapp/utils/firebase.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-import '../controllers/auht_controller.dart';
+import 'package:image_picker/image_picker.dart';
+import '../utils/cloudinary_2.dart';
 import '../widgets/custom_field_text.dart';
 
-class RegistrationScreen extends StatefulWidget {
-  const RegistrationScreen({super.key});
+class AccountSettingsScreen extends StatefulWidget {
+  const AccountSettingsScreen({super.key});
 
   @override
-  State<RegistrationScreen> createState() => _RegistrationScreenState();
+  State<AccountSettingsScreen> createState() => _AccountSettingsScreenState();
 }
 
-class _RegistrationScreenState extends State<RegistrationScreen> {
-  //Informations personnelles
+class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
+  bool uploading = false;
+  bool next = false;
+  final List<File> _image = [];
+  List<String> urlsList = [];
+  double val = 0;
+
   TextEditingController emailTextEditingController = TextEditingController();
   TextEditingController passwordTextEditingController = TextEditingController();
   TextEditingController fullnameTextEditingController = TextEditingController();
@@ -26,7 +31,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   TextEditingController cityTextEditingController = TextEditingController();
   TextEditingController profileHeadingTextEditingController = TextEditingController();
   TextEditingController lookingForPartnerTextEditingController = TextEditingController();
-  TextEditingController genderTextEditingController = TextEditingController();
+
 
   //Apparences
   TextEditingController heightTextEditingController = TextEditingController();
@@ -54,136 +59,278 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   TextEditingController religionTextEditingController = TextEditingController();
   TextEditingController languageSpokenTextEditingController = TextEditingController();
 
-  String? selectedGender;
-
   bool showProgressBar = false;
 
-  final AuthController authController = Get.find<AuthController>();
+  String fullname="";
+  int? age ;
+  String phone="";
+  String country="";
+  String city="";
+  String profileHeading="";
+  String lookingForPartner="";
+  String gender="";
+  String imageUrl ="";
 
+  // Apparences
+  String height="";
+  String weight="";
+  String bodyType="";
+
+  // Lifestyle
+  String drink="";
+  String smoke="";
+  String maritalStatus="";
+  String haveChildren="";
+  String noOfChildren="";
+  String profession="";
+  String employmentStatus="";
+  String incoming="";
+  String livingSituation="";
+  String willingToRelocate="";
+  String relationshipYouLookingFor="";
+  // Background
+  String nationality="";
+  String ethnicity="";
+  String education="";
+  String religion="";
+  String languageSpoken="";
+
+  chooseImage() async {
+       XFile? pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+
+       setState(() {
+         _image.add(File(pickedFile!.path));
+       });
+  }
+
+ /* uploadImages() async{
+    int i = 1;
+    for(var img in _image){
+      setState(() {
+        val = i / _image.length;
+      });
+
+      var refImages = FirebaseStorage
+          .instance
+          .ref()
+          .child("images/${DateTime.now().millisecondsSinceEpoch.toString()}.jpg");
+
+      await refImages.putFile(img).whenComplete(()async{
+        await refImages.getDownloadURL().then((imageUrl){
+            urlsList.add(imageUrl);
+            i++;
+        });
+      });
+    }
+
+  }*/
+  uploadImages() async {
+    int i = 1;
+    for (var img in _image) {
+      setState(() {
+        val = i / _image.length;
+      });
+
+      // Convertir File en XFile pour Cloudinary
+      XFile xFile = XFile(img.path);
+
+      String? imageUrl = await uploadToCloudinary2(xFile);
+
+      if (imageUrl != null) {
+        urlsList.add(imageUrl);
+        i++;
+      }
+    }
+  }
+
+  retrieveUserData() async{
+
+    await FirebaseServices
+        .firestore
+        .collection("users")
+        .doc(FirebaseServices.userCurrentId)
+        .get()
+        .then((snapshot){
+
+          if(snapshot.exists){
+            Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
+            setState(() {
+              fullname= data['fullname'].toString();
+              fullnameTextEditingController.text = fullname;
+              age = data['age'] as int;
+              ageTextEditingController.text = age.toString();
+              phone= data['phone'].toString();
+              phoneTextEditingController.text = phone;
+              country= data['country'].toString();
+              countryTextEditingController.text = country;
+              city= data['city'].toString();
+              cityTextEditingController.text = city;
+              profileHeading= data['profileHeading'].toString();
+              profileHeadingTextEditingController.text =profileHeading;
+              lookingForPartner= data['lookingForPartner'].toString();
+              lookingForPartnerTextEditingController.text = lookingForPartner;
+              height= data['height'].toString();
+              heightTextEditingController.text = height;
+              weight= data['weight'].toString();
+              weightTextEditingController.text = weight;
+              bodyType= data['bodyType'].toString();
+              bodyTypeTextEditingController.text = bodyType;
+              drink= data['drink'].toString();
+              drinkTextEditingController.text = drink;
+              smoke= data['smoke'].toString();
+              smokeTextEditingController.text = smoke;
+              maritalStatus= data['maritalStatus'].toString();
+              maritalStatusTextEditingController.text = maritalStatus;
+              haveChildren= data['haveChildren'].toString();
+              haveChildrenTextEditingController.text = haveChildren;
+              noOfChildren= data['noOfChildren'].toString();
+              noOfChildrenTextEditingController.text = noOfChildren;
+              profession= data['profession'].toString();
+              professionTextEditingController.text = profession;
+              employmentStatus= data['employmentStatus'].toString();
+              employmentStatusTextEditingController.text = employmentStatus;
+              incoming= data['incoming'].toString();
+              incomingTextEditingController.text = incoming;
+              livingSituation= data['livingSituation'].toString();
+              livingSituationTextEditingController.text = livingSituation;
+              willingToRelocate= data['willingToRelocate'].toString();
+              willingToRelocateTextEditingController.text = willingToRelocate;
+              relationshipYouLookingFor= data['relationshipYouLookingFor'].toString();
+              relationshipYouLookingForTextEditingController.text = relationshipYouLookingFor;
+              nationality= data['nationality'].toString();
+              nationalityTextEditingController.text = nationality;
+              ethnicity= data['ethnicity'].toString();
+              ethnicityTextEditingController.text = ethnicity;
+              education= data['education'].toString();
+              educationTextEditingController.text = education;
+              religion= data['religion'].toString();
+              religionTextEditingController.text = religion;
+              languageSpoken= data['languageSpoken'].toString();
+              languageSpokenTextEditingController.text = languageSpoken;
+            });
+          }
+    });
+  }
+
+  updateUserDataFromFirestore({
+    String? fullname, int? age, String? phone, String? country, String? city, String? profileHeading,
+    String? lookingForPartner, String? height, String? weight, String? bodyType, String? drink,
+    String? smoke, String? maritalStatus, String? haveChildren, String? noOfChildren,
+    String? profession, String? employmentStatus, String? incoming,
+    String? livingSituation, String? willingToRelocate, String? relationshipYouLookingFor, String? nationality,
+    String? ethnicity, String? education, String? religion, String? languageSpoken,
+})async{
+    showDialog(
+        context: context,
+        builder: (context){
+          return Center(
+              child: Column(
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 10,),
+                  Text("téléchargement images...",style: TextStyle(fontSize: 16),)
+                ],
+              )
+          );
+        }
+    );
+
+    await uploadImages();
+    
+    await FirebaseServices.firestore.collection("users").doc(FirebaseServices.userCurrentId)
+    .update({
+      'fullname': fullname,
+      'age': age,
+      'phone': phone,
+      'country': country,
+      'city': city,
+      'profileHeading': profileHeading,
+      'lookingForPartner': lookingForPartner,
+      'height': height,
+      'weight': weight,
+      'bodyType': bodyType,
+      'drink': drink,
+      'smoke': smoke,
+      'maritalStatus': maritalStatus,
+      'haveChildren': haveChildren,
+      'noOfChildren': noOfChildren,
+      'profession': profession,
+      'employmentStatus': employmentStatus,
+      'incoming': incoming,
+      'livingSituation': livingSituation,
+      'willingToRelocate': willingToRelocate,
+      'relationshipYouLookingFor': relationshipYouLookingFor,
+      'nationality': nationality,
+      'ethnicity': ethnicity,
+      'education': education,
+      'religion': religion,
+      'languageSpoken': languageSpoken,
+
+      'imageUrl1' : urlsList[0].toString(),
+      'imageUrl2' : urlsList[1].toString(),
+      'imageUrl3' : urlsList[2].toString(),
+      'imageUrl4' : urlsList[3].toString(),
+      'imageUrl5' : urlsList[4].toString(),
+    });
+
+    Get.snackbar("Mise a jour ", "Votre compte a été mise à jour avec succès");
+    Get.to(HomeScreen());
+    setState(() {
+      uploading = false;
+      _image.clear();
+      urlsList.clear();
+    });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    retrieveUserData();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
+      appBar: AppBar(
+        backgroundColor: Color(0xFF123880),
+        title: Text(
+          next ? "Informations du profil" : "Choisir 5 images",
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 23,
+          ),
+        ),
+        actions: [
+          next
+              ? Container()
+              : IconButton(
+              onPressed:(){
+                if(_image.length == 5){
+                  setState(() {
+                        uploading = true;
+                        next = true;
+                  });
+                }
+                else{
+                  Get.snackbar("5 images","S'il vous plait choisissez 5 images",backgroundColor: Color(0xFF123880),
+                      colorText: Colors.white);
+                }
+              },
+              icon: Icon(Icons.navigate_next_outlined,size: 34,),
+          ),
+        ],
+      ),
+      body:  next
+          ? SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 18.0),
+            padding: EdgeInsets.all(30),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              const SizedBox(height: 60),
-              const  Text(
-                "Creation de compte",
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 22,
-                    color: Color(0xFF123880)
-                ),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              const Text(
-                "pour commencer maintenant",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 22,
-                    color: Color(0xFF123880)
-                ),
-              ),
-
-              const SizedBox(
-                height: 30,
-
-              ),
-
-              //image avatar
-              authController.imageFile == null ?
-              CircleAvatar(
-                radius: 70,
-                backgroundImage: AssetImage(
-                  "images/userp.png",
-                ),
-                backgroundColor: Colors.black,
-              ): Container(
-                height: 180,
-                width: 180,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.grey,
-                  image: DecorationImage(
-                    fit: BoxFit.fitHeight,
-                    image: FileImage(
-                      File(authController.imageFile!.path)
-                    )
-                  )
-                ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  IconButton(
-                      onPressed: () async{
-                        await authController.captureImageFromPhoneCamera();
-                        setState(() {
-                          authController.imageFile;
-                        });
-                      },
-                      icon: Icon(Icons.camera_alt_outlined,color:Colors.grey , size: 30,)
-                  ),
-                  const SizedBox(width: 10,),
-                  IconButton(
-                      onPressed: ()async{
-                          await authController.pickImageFileFromGallery();
-                          setState(() {
-                            authController.imageFile;
-                          });
-                        },
-                      icon: Icon(Icons.image_outlined ,color:Colors.grey , size: 30,)
-                  ),
-
-                ],
-              ),
-              const SizedBox(
-                height: 30,
-
-              ),
-
-              //informations personnelles debut
               Center(child: Text("INFORMATIONS PERSONNELLES", style: TextStyle(fontWeight: FontWeight.bold , fontSize: 18 , color: Color(0xFF123880)),),),
               const SizedBox(height: 10,),
-              //Email
-              SizedBox(
-                width: MediaQuery.of(context).size.width - 36,
-                height: 56,
-                child: CustomFieldText(
-                  keyboardType: TextInputType.emailAddress,
-                  editingController: emailTextEditingController,
-                  labelText: "Email",
-                  iconData: Icons.email_outlined,
-                  isObscure: false,
-                ),
-              ),
-              const SizedBox(
-                height: 30,
-
-              ),
-              //password
-              SizedBox(
-                width: MediaQuery.of(context).size.width - 36,
-                height: 56,
-                child: CustomFieldText(
-                  editingController: passwordTextEditingController,
-                  labelText: "Mot de passe",
-                  iconData: Icons.lock_outlined,
-                  isObscure: true,
-                ),
-              ),
-              const SizedBox(
-                height: 30,
-
-              ),
-
-              // fullname
+              //fullname
               SizedBox(
                 width: MediaQuery.of(context).size.width - 36,
                 height: 56,
@@ -195,10 +342,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   isObscure: false,
                 ),
               ),
-              const SizedBox(
-                height: 30,
-
-              ),
+              const SizedBox(height: 15,),
               //age
               SizedBox(
                 width: MediaQuery.of(context).size.width - 36,
@@ -211,84 +355,20 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   isObscure: false,
                 ),
               ),
-              const SizedBox(
-                height: 15,
-
-              ),
-
-              //gender
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: Text(
-                      "Sexe",
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                  ),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: RadioListTile<String>(
-                          title: Text("Homme" ,style: TextStyle(fontSize: 20,color: Colors.black, fontWeight: FontWeight.bold),),
-                          value: "Homme",
-                          groupValue: selectedGender,
-                          onChanged: (value) {
-                            setState(() {
-                              selectedGender = value;
-                            });
-                          },
-                          dense: true,
-                          contentPadding: EdgeInsets.zero,
-                          activeColor: Color(0xFF123880), // Couleur de sélection
-                          tileColor: Colors.grey[100], // Fond des tuiles
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: RadioListTile<String>(
-                          title: Text("Femme",style: TextStyle(fontSize: 20,color: Colors.black, fontWeight: FontWeight.bold)),
-                          value: "Femme",
-                          groupValue: selectedGender,
-                          onChanged: (value) {
-                            setState(() {
-                              selectedGender = value;
-                            });
-                          },
-                          dense: true,
-                          contentPadding: EdgeInsets.zero,
-                          activeColor: Color(0xFF123880), // Couleur de sélection
-                          tileColor: Colors.grey[100], // Fond des tuiles
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-             const SizedBox(height: 10,),
-             /* SizedBox(
+              const SizedBox(height: 15,),
+              // phone
+              SizedBox(
                 width: MediaQuery.of(context).size.width - 36,
                 height: 56,
                 child: CustomFieldText(
-                  editingController: genderTextEditingController,
-                  labelText: "Sexe",
-                  iconData: Icons.male,
+                  keyboardType: TextInputType.number,
+                  editingController: phoneTextEditingController,
+                  labelText: "Numero de telephone",
+                  iconData: Icons.numbers_outlined,
                   isObscure: false,
                 ),
               ),
-              const SizedBox(
-                height: 30,
-
-              ),*/
+              const SizedBox(height: 15,),
               //pays
               SizedBox(
                 width: MediaQuery.of(context).size.width - 36,
@@ -314,22 +394,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   editingController: cityTextEditingController,
                   labelText: "ville",
                   iconData: Icons.location_city,
-                  isObscure: false,
-                ),
-              ),
-              const SizedBox(
-                height: 30,
-
-              ),
-              //phone
-              SizedBox(
-                width: MediaQuery.of(context).size.width - 36,
-                height: 56,
-                child: CustomFieldText(
-                  keyboardType: TextInputType.phone,
-                  editingController: phoneTextEditingController,
-                  labelText: "Numero telephone",
-                  iconData: Icons.phone,
                   isObscure: false,
                 ),
               ),
@@ -367,12 +431,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               ),
               const SizedBox(height: 30,),
 
-              //informations personnelles fin
+              // informations personnelles fin
 
               //apparences physiques debut
               Center(child: Text("APPARENCES", style: TextStyle(fontWeight: FontWeight.bold , fontSize: 18 , color: Color(0xFF123880)),),),
               const SizedBox(height: 10,),
-
               // taille
               SizedBox(
                 width: MediaQuery.of(context).size.width - 36,
@@ -419,9 +482,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
               ),
               // apprences physiques fin
-
-
-              //Style de vie
 
               Center(child: Text("LIFESTYLE", style: TextStyle(fontWeight: FontWeight.bold , fontSize: 18 , color: Color(0xFF123880)),),),
               const SizedBox(height: 10,),
@@ -654,11 +714,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
               //Bcakground et autres...(fin)
 
-
-              const SizedBox(
-                height: 30,
-              ),
-
               Container(
                 width: MediaQuery.of(context).size.width - 36,
                 height: 50,
@@ -670,103 +725,87 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 ),
                 child: InkWell(
                   onTap: () async{
-                      if(authController.profileImage != null){
-                        final List<TextEditingController> allTextControllers = [
-                          emailTextEditingController,
-                          passwordTextEditingController,
-                          fullnameTextEditingController,
-                          ageTextEditingController,
-                          phoneTextEditingController,
-                          countryTextEditingController,
-                          cityTextEditingController,
-                          profileHeadingTextEditingController,
-                          lookingForPartnerTextEditingController,
+                    final List<TextEditingController> allTextControllers = [
+                      fullnameTextEditingController,
+                      ageTextEditingController,
+                      phoneTextEditingController,
+                      countryTextEditingController,
+                      cityTextEditingController,
+                      profileHeadingTextEditingController,
+                      lookingForPartnerTextEditingController,
 
-                          heightTextEditingController,
-                          weightTextEditingController,
-                          bodyTypeTextEditingController,
+                      heightTextEditingController,
+                      weightTextEditingController,
+                      bodyTypeTextEditingController,
 
-                          drinkTextEditingController,
-                          smokeTextEditingController,
-                          maritalStatusTextEditingController,
-                          haveChildrenTextEditingController,
-                          noOfChildrenTextEditingController,
-                          professionTextEditingController,
-                          employmentStatusTextEditingController,
-                          incomingTextEditingController,
-                          livingSituationTextEditingController,
-                          willingToRelocateTextEditingController,
-                          relationshipYouLookingForTextEditingController,
+                      drinkTextEditingController,
+                      smokeTextEditingController,
+                      maritalStatusTextEditingController,
+                      haveChildrenTextEditingController,
+                      noOfChildrenTextEditingController,
+                      professionTextEditingController,
+                      employmentStatusTextEditingController,
+                      incomingTextEditingController,
+                      livingSituationTextEditingController,
+                      willingToRelocateTextEditingController,
+                      relationshipYouLookingForTextEditingController,
 
-                          nationalityTextEditingController,
-                          ethnicityTextEditingController,
-                          educationTextEditingController,
-                          religionTextEditingController,
-                          languageSpokenTextEditingController,
-                        ];
-                        bool isAnyTextFieldEmpty = allTextControllers.any((controller) => controller.text.trim().isEmpty);
-                        bool isGenderSelected = selectedGender != null;
-                        if(!isAnyTextFieldEmpty || !isGenderSelected){
-                          setState(() {
-                            showProgressBar = true;
-                          });
-                           await authController.createNewUserAccount(
-                                imageUrl: authController.profileImage,
-                                emailAddress: emailTextEditingController.text.trim(),
-                                fullname:fullnameTextEditingController.text.trim() ,
-                                password: passwordTextEditingController.text.trim(),
-                                age: ageTextEditingController.text.trim(),
-                                phone: phoneTextEditingController.text.trim(),
-                                country: countryTextEditingController.text.trim(),
-                                city: cityTextEditingController.text.trim(),
-                                profileHeading: profileHeadingTextEditingController.text.trim(),
-                                lookingForPartner: lookingForPartnerTextEditingController.text.trim(),
-                                gender: selectedGender.toString(),
+                      nationalityTextEditingController,
+                      ethnicityTextEditingController,
+                      educationTextEditingController,
+                      religionTextEditingController,
+                      languageSpokenTextEditingController,
+                    ];
+                    bool isAnyTextFieldEmpty = allTextControllers.any((controller) => controller.text.trim().isEmpty);
+                    if(!isAnyTextFieldEmpty){
+                      setState(() {
+                        showProgressBar = true;
+                      });
+                      _image.length > 0 ?
+                      await updateUserDataFromFirestore(
+                        fullname:fullnameTextEditingController.text.trim() ,
+                        age: int.parse(ageTextEditingController.text.trim()),
+                        phone: phoneTextEditingController.text.trim(),
+                        country: countryTextEditingController.text.trim(),
+                        city: cityTextEditingController.text.trim(),
+                        profileHeading: profileHeadingTextEditingController.text.trim(),
+                        lookingForPartner: lookingForPartnerTextEditingController.text.trim(),
 
-                                height: heightTextEditingController.text.trim(),
-                                weight: weightTextEditingController.text.trim(),
-                                bodyType: bodyTypeTextEditingController.text.trim(),
 
-                                drink: drinkTextEditingController.text.trim(),
-                                smoke: smokeTextEditingController.text.trim(),
-                                maritalStatus: maritalStatusTextEditingController.text.trim(),
-                                haveChildren: haveChildrenTextEditingController.text.trim(),
-                                noOfChildren: noOfChildrenTextEditingController.text.trim(),
-                                profession: professionTextEditingController.text.trim(),
-                                employmentStatus: employmentStatusTextEditingController.text.trim(),
-                                incoming: incomingTextEditingController.text.trim(),
-                                livingSituation: livingSituationTextEditingController.text.trim(),
-                                willingToRelocate: willingToRelocateTextEditingController.text.trim(),
-                                relationshipYouLookingFor: relationshipYouLookingForTextEditingController.text.trim(),
+                        height: heightTextEditingController.text.trim(),
+                        weight: weightTextEditingController.text.trim(),
+                        bodyType: bodyTypeTextEditingController.text.trim(),
 
-                                nationality: nationalityTextEditingController.text.trim(),
-                                ethnicity: ethnicityTextEditingController.text.trim(),
-                                education: educationTextEditingController.text.trim(),
-                                religion: religionTextEditingController.text.trim(),
-                                languageSpoken: languageSpokenTextEditingController.text.trim(),
-                                context: context,
-                           );
-                           setState(() {
-                             showProgressBar = false;
-                             authController.imageFile = null;
-                           });
-                        } else{
-                          Get.snackbar("Un champ est vide", "Veuillez remplir tous les champs" ,backgroundColor: Color(0xFF123880),
-                              colorText: Colors.white);
-                        }
-                      }else{
-                        Get.snackbar("Fichier image manquant", "Veuillez choisir une image dans la galerie ou la capturer avec un appareil photo"
-                        ,backgroundColor: Color(0xFF123880),
-                            colorText: Colors.white
-                        );
-                      }
+                        drink: drinkTextEditingController.text.trim(),
+                        smoke: smokeTextEditingController.text.trim(),
+                        maritalStatus: maritalStatusTextEditingController.text.trim(),
+                        haveChildren: haveChildrenTextEditingController.text.trim(),
+                        noOfChildren: noOfChildrenTextEditingController.text.trim(),
+                        profession: professionTextEditingController.text.trim(),
+                        employmentStatus: employmentStatusTextEditingController.text.trim(),
+                        incoming: incomingTextEditingController.text.trim(),
+                        livingSituation: livingSituationTextEditingController.text.trim(),
+                        willingToRelocate: willingToRelocateTextEditingController.text.trim(),
+                        relationshipYouLookingFor: relationshipYouLookingForTextEditingController.text.trim(),
+
+                        nationality: nationalityTextEditingController.text.trim(),
+                        ethnicity: ethnicityTextEditingController.text.trim(),
+                        education: educationTextEditingController.text.trim(),
+                        religion: religionTextEditingController.text.trim(),
+                        languageSpoken: languageSpokenTextEditingController.text.trim(),
+
+                      ):null;
+                    } else{
+                      Get.snackbar("Un champ est vide", "Veuillez remplir tous les champs" ,backgroundColor: Color(0xFF123880),
+                          colorText: Colors.white);
+                    }
                   },
                   child: Center(
                     child:showProgressBar?CircularProgressIndicator(
                       valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                       strokeWidth: 3,
                     ) :Text(
-                      "Créer un compte",
+                      "Mettre à jour votre compte",
                       style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold
@@ -775,31 +814,60 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 8,),
-              Wrap(
-                alignment: WrapAlignment.center,
-                children: [
-                  Text(" Deja un compte? ", style: TextStyle(fontSize: 16,color: Colors.black),),
-                  InkWell(
-                      onTap: (){
-                        Get.to(LoginScreen());
-                      },
-                      child: Text("Connectez-vous directement", style: TextStyle(fontSize: 16 , fontWeight: FontWeight.w900 , color: Color(0xFF123880)),)
-                  )
-                ],
-              ),
-              const SizedBox(
-                height: 30,
-              ),
-              showProgressBar == true ? CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.blueAccent.withAlpha(20)),
-              ) : Container()
-
-
             ],
           ),
         ),
+
+      )
+          : Stack(
+          children: [
+            Container(
+              padding:  const EdgeInsets.all(5),
+              child: GridView.builder(
+                  itemCount: _image.length + 1,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                  ),
+                  itemBuilder: (context,index){
+                    return index == 0
+                        ? Container(
+                      color: Colors.grey[300],
+                      child: Center(
+                        child: IconButton(
+                            onPressed: (){
+                              if(_image.length < 5){
+                                !uploading ? chooseImage() : null;
+                              }else{
+                                setState(() {
+                                  uploading = true;
+                                });
+                                Get.snackbar("5 images choisies", "Les 5 images ont déjà selectionnées ",backgroundColor: Color(
+                                    0xFFE63C5A),
+                                    colorText: Colors.white);
+                              }
+
+                            },
+                            icon: const Icon(Icons.add , size: 29,color: Color(0xFF123880),)
+                        ),
+                      ),
+                    ) : Container(
+                      margin: const EdgeInsets.all(3),
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                            image: FileImage(
+                                _image[index - 1],
+                            ),
+                          fit: BoxFit.cover
+                        )
+                      ),
+                    );
+                  }
+              ),
+            )
+          ],
       ),
     );
   }
+
+
 }

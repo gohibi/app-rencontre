@@ -1,5 +1,6 @@
 import 'package:datingapp/authentication_screen/login_screen.dart';
 import 'package:datingapp/controllers/auht_controller.dart';
+import 'package:datingapp/utils/firebaseoptions.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -9,11 +10,12 @@ import 'controllers/profile_controller.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: ".env");
-  Firebase.initializeApp().then((value){
-    Get.put(AuthController());
+  await Firebase.initializeApp(options: firebaseOptions);
 
-  });
+  await dotenv.load(fileName: ".env");
+
+  Get.put(AuthController());
+  Get.put(ProfileController());
 
   runApp(const MyApp());
 }

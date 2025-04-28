@@ -1,0 +1,62 @@
+GridView.count(
+        crossAxisCount: 2,
+        padding: const EdgeInsets.all(8),
+        children: List.generate(favoritesList.length, (index){
+          return GridTile(child: Padding(
+            padding: const EdgeInsets.all(3),
+            child: Card(
+              color: Colors.blue,
+              child: GestureDetector(
+                onTap: (){
+
+                },
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: NetworkImage(
+                        favoritesList[index]["imageUrl"]
+                      ),
+                      fit: BoxFit.cover
+                    )
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Center(
+                      child: Column(
+                        children: [
+                          Text(
+                            "${favoritesList[index]["fullname"].toString().toUpperCase()} ● ${favoritesList[index]["age"].toString().toUpperCase()} ans",
+                            style:TextStyle(
+                            color: Color(0xFF123880),
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            )  ,
+                          ),
+                          const SizedBox(
+                            height: 8,
+                          ),
+
+                          Row(
+                            children: [
+                              Text(
+                                "${favoritesList[index]["city"]} ● ${favoritesList[index]["country"].toString()} ",
+                                style:TextStyle(
+                                  color: Color(0xFF123880),
+                                  fontSize: 16,
+
+                                )  ,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+
+                  ),
+                ),
+              ),
+            ),
+          ));
+        }),
+
+      ),
