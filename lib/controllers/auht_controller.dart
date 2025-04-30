@@ -75,7 +75,7 @@ class AuthController extends GetxController{
     try{
       isLoading.value = true;
       if(emailAddress.isEmpty || fullname.isEmpty ){
-        showCustomDialog(context: context,
+        showCustomizeDialog(context: context,
             title: "erreur",
             content: "Veuillez remplir tous les champs obligatoires."
         );
@@ -84,7 +84,7 @@ class AuthController extends GetxController{
         return;
       }
       if(imageFile == null){
-        showCustomDialog(
+        showCustomizeDialog(
           context: context,
           title: "Image requise",
           content: "Veuillez sélectionner une image de profil.",
@@ -154,7 +154,7 @@ class AuthController extends GetxController{
 
     }
     catch(error){
-    showCustomDialog(
+    showCustomizeDialog(
         context : context,
         title: "erreur",
         content: "Probleme rencontré lors de la creation d'un compte:${error.toString()}",
@@ -171,7 +171,7 @@ class AuthController extends GetxController{
       isLoading.value = true;
       // verifier si les champs sont vides
       if(email.isEmpty || password.isEmpty){
-        showCustomDialog(context: context,
+        showCustomizeDialog(context: context,
             title:"Erreur",
             content: "Veuillez saisir votre email et Mot de passe"
         );
@@ -184,7 +184,7 @@ class AuthController extends GetxController{
       //Verification s'il existe dans la base de données firestore
       DocumentSnapshot userDoc = await FirebaseServices.firestore.collection("users").doc(userCredential.user!.uid).get();
       if(!userDoc.exists){
-        showCustomDialog(
+        showCustomizeDialog(
           context: context,
           title: "Erreur",
           content: "Aucun compte trouvé pour cet utilisateur.",
@@ -223,7 +223,7 @@ class AuthController extends GetxController{
             break;
         }
       }
-      showCustomDialog(
+      showCustomizeDialog(
         context: context,
         title: "Erreur de connexion",
         content: errorMessage,

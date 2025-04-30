@@ -9,6 +9,8 @@ class FirebaseServices{
 
   static String userCurrentId = auth.currentUser!.uid;
 
+
+
   Future<UserCredential> createUserWithEmailAndPassword({
     required String email,
     required String password

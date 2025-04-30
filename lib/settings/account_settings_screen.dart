@@ -223,14 +223,19 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
     showDialog(
         context: context,
         builder: (context){
-          return Center(
-              child: Column(
-                children: [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 10,),
-                  Text("téléchargement images...",style: TextStyle(fontSize: 16),)
-                ],
-              )
+          return const AlertDialog(
+            content: SizedBox(
+              height: 200,
+              child: Center(
+                  child: Column(
+                    children: [
+                      CircularProgressIndicator(),
+                      SizedBox(height: 10,),
+                      Text("téléchargement images...",style: TextStyle(fontSize: 16),)
+                    ],
+                  )
+              ),
+            ),
           );
         }
     );

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-void showCustomDialog({
+void showCustomizeDialog({
 required BuildContext context,
 required String title,
 required String content,

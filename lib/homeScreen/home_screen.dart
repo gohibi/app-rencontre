@@ -1,3 +1,4 @@
+import 'package:datingapp/pushNotificationsSystem/push_notifications_system.dart';
 import 'package:datingapp/tabSceens/favorite_sent_favorite_received_screen.dart';
 import 'package:datingapp/tabSceens/like_sent_like_received_screen.dart';
 import 'package:datingapp/tabSceens/swipping_screen.dart';
@@ -28,6 +29,15 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _selectedIndex = index;
     });
+  }
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    PushNotificationSystem pushNotificationSystem = PushNotificationSystem();
+    pushNotificationSystem.generateDeviceRegistrationToken();
+    pushNotificationSystem.whenNotificationsReceived(context);
+
   }
 
   @override

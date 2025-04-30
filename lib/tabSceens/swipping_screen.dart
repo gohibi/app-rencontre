@@ -1,9 +1,14 @@
+import 'dart:io';
+
 import 'package:datingapp/controllers/profile_controller.dart';
 
 import 'package:datingapp/utils/error.dart';
 import 'package:datingapp/utils/firebase.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import '../utils/globa_var.dart';
 
 class SwippingScreen extends StatefulWidget {
   const SwippingScreen({super.key});
@@ -18,6 +23,7 @@ class _SwippingScreenState extends State<SwippingScreen> {
 
   String senderName = "";
 
+
   readCurrentUserdata() async {
     await FirebaseServices.firestore
         .collection("users")
@@ -28,6 +34,168 @@ class _SwippingScreenState extends State<SwippingScreen> {
         senderName = snapshot.data()!["fullname"].toString();
       });
     });
+  }
+
+  applyFilter(){
+    showDialog(
+        context: context,
+        builder:(BuildContext context){
+          return StatefulBuilder(
+              builder: (BuildContext context,StateSetter setState){
+                return AlertDialog(
+                  title: const Text("Flitre"),
+                  content: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text("Je recherche"),
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: DropdownButton<String>(
+                          hint: const Text("Selectionne le genre"),
+                            value: chosenGender,
+                            underline: Container(),
+                            items: [
+                              "Homme",
+                              "Femme"
+                            ].map((value){
+                              return DropdownMenuItem<String>(
+                                value:value,
+                                  child: Text(
+                                    value,
+                                    style: const TextStyle(fontWeight: FontWeight.w800),
+                                  )
+                              );
+                            }).toList(),
+                            onChanged: (String? value){
+                              setState(() {
+                                chosenGender = value;
+                              });
+                            }
+                        ),
+                      ),
+                      const SizedBox(height: 20,),
+
+                      const Text("Qui vit "),
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: DropdownButton<String>(
+                            hint: const Text("Selectionne un pays"),
+                            value: chosenCountry,
+                            underline: Container(),
+                            items: [
+                              "Cote d'ivoire",
+                              "Cameroun",
+                              "Ghana",
+                              "France",
+                              "Russie",
+                              "Canada",
+                              "Burkina Faso",
+                              "Congo"
+                            ].map((value){
+                              return DropdownMenuItem<String>(
+                                  value:value,
+                                  child: Text(
+                                    value,
+                                    style: const TextStyle(fontWeight: FontWeight.w800),
+                                  )
+                              );
+                            }).toList(),
+                            onChanged: (String? value){
+                              setState(() {
+                                chosenCountry = value;
+                              });
+                            }
+                        ),
+                      ),
+                      const SizedBox(height: 20,),
+
+
+                      const Text("Dont l'âge est égal ou supérieur à "),
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: DropdownButton<String>(
+                            hint: const Text("Selectionne l'age"),
+                            value: chosenAge,
+                            underline: Container(),
+                            items: [
+                              "18",
+                              "20",
+                              "22",
+                              "24",
+                              "25",
+                              "27",
+                              "30",
+                              "32",
+                              "35"
+                            ].map((value){
+                              return DropdownMenuItem<String>(
+                                  value:value,
+                                  child: Text(
+                                    value,
+                                    style: const TextStyle(fontWeight: FontWeight.w800),
+                                  )
+                              );
+                            }).toList(),
+                            onChanged: (String? value){
+                              setState(() {
+                                chosenAge = value;
+                              });
+                            }
+                        ),
+                      ),
+                      const SizedBox(height: 20,),
+
+                    ],
+
+                  ),
+                  actions: [
+                    ElevatedButton(onPressed: (){
+                      Get.back();
+                      profileController.getResults();
+
+                    }, child: const Text("Terminé"))
+                  ],
+                );
+              }
+          );
+        }
+    );
+  }
+
+  startChattingInWhatsApp(String receiverPhoneNumber) async{
+    String text = '';
+    var androidUrl = "whatsapp://send?phone=$receiverPhoneNumber&text=$text";
+    var iosUrl = "https://wa.me/$receiverPhoneNumber?text=${Uri.parse(text)}";
+    try{
+        if(Platform.isIOS){
+          await launchUrl((Uri.parse(iosUrl)));
+        }
+        else{
+          await launchUrl((Uri.parse(androidUrl)));
+        }
+    }
+    on Exception{
+      showDialog(
+          context: context,
+          builder: (BuildContext context)
+          {
+            return AlertDialog(
+              title: const Text("WhatsApp introuvable"),
+              content: const Text("WhatsApp n'est pas installé"),
+              actions: [
+                TextButton(
+                    onPressed: (){Get.back();},
+                    child: const Text("OK")
+                )
+              ],
+            );
+          }
+      );
+    }
+    catch(error){
+
+    }
   }
 
   @override
@@ -54,7 +222,7 @@ class _SwippingScreenState extends State<SwippingScreen> {
                     final isAdded = await profileController.viewSentAndViewReceived(infoProfileUser.uid.toString(), senderName);
                     _showCustomDialog(isAdded, "Ce profil a été ajouté dans les vues", "Ce profil a été retiré des vues");
                   } catch(e){
-                    showCustomDialog(context: context, title: "Erreur", content: "Opération échouée : ${e.toString()}");
+                    showCustomizeDialog(context: context, title: "Erreur", content: "Opération échouée : ${e.toString()}");
                   }
                 },
                 child: DecoratedBox(
@@ -73,7 +241,9 @@ class _SwippingScreenState extends State<SwippingScreen> {
                           child: Padding(
                             padding: const EdgeInsets.only(top: 8),
                             child: IconButton(
-                                onPressed: () {},
+                                onPressed: () {
+                                  applyFilter();
+                                },
                                 icon: Icon(
                                   Icons.filter_list_outlined,
                                   size: 32,
@@ -186,7 +356,9 @@ class _SwippingScreenState extends State<SwippingScreen> {
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
                               GestureDetector(
-                                onTap: (){},
+                                onTap: (){
+                                  startChattingInWhatsApp(infoProfileUser.phone.toString());
+                                },
                                 child: Image.asset(
                                   "images/chat_104913.png",
                                   width: 60,
@@ -202,7 +374,7 @@ class _SwippingScreenState extends State<SwippingScreen> {
 
                                   }
                                   catch(e){
-                                    showCustomDialog(context: context, title:"Erreur", content: "Opération échouée : ${e.toString()}");
+                                    showCustomizeDialog(context: context, title:"Erreur", content: "Opération échouée : ${e.toString()}");
                                   }
                                 },
                                 child: Image.asset(

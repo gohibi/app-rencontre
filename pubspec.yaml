@@ -44,6 +44,10 @@ dependencies:
   firebase_messaging:
   flutter_image_slider:
   firebase_storage:
+  permission_handler:
+  googleapis:
+  googleapis_auth:
+  url_launcher: ^6.3.1
 
 dev_dependencies:
   flutter_test:
